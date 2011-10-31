@@ -44,7 +44,7 @@ module Livestatus
     end
 
     def query(method, query, headers = {})
-      headers = headers.map { |k,v| "#{k}: #{v}" }.join("\n")
+      headers = headers.map { |k,v| "#{k.to_s.capitalize}: #{v}" }.join("\n")
       headers += "\n" unless headers.empty?
 
       query = CGI::escape("#{method.to_s.upcase} #{query}\n#{headers}")
