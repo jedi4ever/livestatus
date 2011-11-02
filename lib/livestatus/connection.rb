@@ -3,25 +3,25 @@ require "livestatus/handler"
 module Livestatus
 
   class Connection
-    def initialize(uri)
-      @uri = uri
-    end
+    extend Forwardable
 
-    def get(table, headers = {})
-      handler.get(table, headers)
-    end
+    def_delegators :handler, :get, :command
 
-    def command(cmd, time = nil)
-      handler.command(cmd, time)
+    def initialize(config)
+      @config = config.symbolize_keys!
     end
 
     def handler
-      @handler ||= case @uri
-                   when /^https?:\/\//
-                     PatronHandler.new(@uri)
-                   else
-                     raise AttributeError, "unknown uri type: #{@uri}"
-                   end
+      @handler ||= handler!
+    end
+
+    def handler!
+      case @config[:uri]
+      when /^https?:\/\//
+        PatronHandler.new(@config)
+      else
+        raise AttributeError, "unknown uri type: #{@config[:uri]}"
+      end
     end
   end
 
