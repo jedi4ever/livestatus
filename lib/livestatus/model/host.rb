@@ -5,7 +5,7 @@ class Livestatus::Host < Livestatus::Base
       1 => :warning,
       2 => :critical,
       3 => :unknown,
-    }[@data['state']]
+    }[@data[:state]]
   end
 
   def state_class
