@@ -1,6 +1,6 @@
+require 'livestatus/handler'
 require 'patron'
 require 'yajl'
-require 'cgi'
 
 module Livestatus
 
@@ -12,31 +12,26 @@ module Livestatus
       @session.timeout = 10
       @session.headers["User-Agent"] = "livestatus/#{VERSION} ruby/#{RUBY_VERSION}"
       @session.insecure = config[:insecure]
-      @session.auth_type = config[:auth_type].to_sym
+      @session.auth_type = config.fetch(:auth_type, :basic).to_sym
       @session.username = config[:username]
       @session.password = config[:password]
       @uri = config[:uri]
     end
 
     def query(method, query, headers = {})
-      headers = headers.map { |k,v| "#{k.to_s.capitalize}: #{v}" }.join("\n")
-      headers += "\n" unless headers.empty?
+      headers = Hash[headers.merge({
+        :query => "#{method.to_s.upcase} #{query}"
+      }).map do |k, v|
+        ["X-Livestatus-#{k.to_s.dasherize}", v]
+      end]
 
-      query = CGI::escape("#{method.to_s.upcase} #{query}\n#{headers}")
-      result = session.get("#{@uri}?q=#{query}")
+      result = session.get(@uri, headers)
 
       unless result.status == 200
         raise HandlerException, "livestatus query failed with status #{result.status}"
       end
 
-      parser = Yajl::Parser.new
-      data = parser.parse(result.body)
-
-      if data[0][0] > 0
-        raise HandlerException, "livestatus returned error: #{data[0][1]}"
-      end
-
-      return data[1]
+      Yajl::Parser.parse(result.body)
     end
   end
 
