@@ -1,4 +1,9 @@
+require "active_support/core_ext"
+
 module Livestatus
+  mattr_accessor :models
+  self.models = []
+
   class Base
     attr_reader :data
 
@@ -81,4 +86,12 @@ module Livestatus
       }[data[:check_type]]
     end
   end
+end
+
+# load all models and register in Livestatus.models
+Dir["#{File.dirname(__FILE__)}/models/*.rb"].map do |path|
+  File.basename(path, '.rb')
+end.each do |name|
+  require "livestatus/models/#{name}"
+  Livestatus.models << "Livestatus::#{name.pluralize.classify}".constantize
 end
