@@ -7,7 +7,8 @@ module Livestatus
   class PatronHandler < BaseHandler
     attr_accessor :session
 
-    def initialize(config)
+    def initialize(connection, config)
+      @connection = connection
       @session = Patron::Session.new
       @session.timeout = 10
       @session.headers["User-Agent"] = "livestatus/#{VERSION} ruby/#{RUBY_VERSION}"

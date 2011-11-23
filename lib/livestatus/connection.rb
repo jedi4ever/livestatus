@@ -18,9 +18,9 @@ module Livestatus
     def handler!
       case @config[:uri]
       when /^https?:\/\//
-        PatronHandler.new(@config)
+        PatronHandler.new(self, @config)
       when /^unix:\/\//
-        UnixHandler.new(@config)
+        UnixHandler.new(self, @config)
       else
         raise AttributeError, "unknown uri type: #{@config[:uri]}"
       end

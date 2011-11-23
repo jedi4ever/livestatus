@@ -5,7 +5,8 @@ require 'yajl'
 module Livestatus
 
   class UnixHandler < BaseHandler
-    def initialize(config)
+    def initialize(connection, config)
+      @connection = connection
       @socket = UNIXSocket.open(config[:uri].sub(/^unix:\/\//, ''))
     end
 

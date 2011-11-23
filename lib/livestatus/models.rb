@@ -7,8 +7,9 @@ module Livestatus
   class Base
     attr_reader :data
 
-    def initialize(data)
+    def initialize(data, connection = nil)
       @data = data.symbolize_keys!
+      @connection = connection
     end
 
     def method_missing(name, *args)
@@ -16,12 +17,6 @@ module Livestatus
     end
 
     class << self
-      def find(options = {})
-        Livestatus.get(table_name, options).map do |data|
-          new(data)
-        end
-      end
-
       def table_name
         to_s.demodulize.tableize.downcase.pluralize
       end
