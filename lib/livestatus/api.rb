@@ -17,13 +17,20 @@ module Livestatus
       headers = parse_headers(request.env)
 
       halt 400, 'no query specified' unless headers.include?(:query)
-      method, model = headers.delete(:query).split
+      method, query = headers.delete(:query).split
 
       halt 400, 'invalid method' unless ['GET', 'COMMAND'].include?(method)
       method = method.downcase.to_sym
 
       c = Livestatus::Connection.new(:uri => 'unix:///var/nagios/rw/live')
-      Yajl::Encoder.encode(c.handler.send(method, model, headers))
+
+      case method
+      when :get
+        Yajl::Encoder.encode(c.get(query, headers))
+      when :command
+        c.command(query)
+        Yajl::Encoder.encode(c.command(query))
+      end
     end
   end
 end

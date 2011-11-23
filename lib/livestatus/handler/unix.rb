@@ -31,16 +31,22 @@ module Livestatus
       headers = headers.map { |k,v| "#{k.to_s.camelize}: #{v}" }.join("\n")
       headers += "\n" unless headers.empty?
 
-      @socket.write("#{method.to_s.upcase} #{query}\n#{headers}\n")
+      case method
+      when :get
+        @socket.write("#{method.to_s.upcase} #{query}\n#{headers}\n")
 
-      res = @socket.read(16)
-      status, length = res[0..2].to_i, res[4..14].chomp.to_i
+        res = @socket.read(16)
+        status, length = res[0..2].to_i, res[4..14].chomp.to_i
 
-      unless status == 200
-        raise HandlerException, "livestatus query failed with status #{status}"
+        unless status == 200
+          raise HandlerException, "livestatus query failed with status #{status}"
+        end
+
+        Yajl::Parser.new.parse(@socket.read(length))
+      when :command
+        @socket.write("#{method.to_s.upcase} #{query}\n\n")
+        nil
       end
-
-      Yajl::Parser.new.parse(@socket.read(length))
     end
 
     private
