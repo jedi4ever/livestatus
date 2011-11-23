@@ -6,7 +6,9 @@ require "livestatus/models"
 
 module Livestatus
   mattr_accessor :config
-  self.config = {}
+  self.config = {
+    :uri => "unix:///var/nagios/rw/live",
+  }
 
   def self.connection
     @@connection ||= connection!

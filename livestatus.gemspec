@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = Livestatus::VERSION
   s.authors     = ["Benedikt Böhm"]
   s.email       = ["bb@xnull.de"]
-  s.homepage    = ""
-  s.summary     = %q{Simple API wrapper for MK Livestatus and LivestatusSlave}
-  s.description = %q{Simple API wrapper for MK Livestatus and LivestatusSlave}
+  s.homepage    = "https://github.com/zenops/livestatus"
+  s.summary     = %q{Livestatus is a simple Ruby library to control Nagios via MK Livestatus.}
+  s.description = %q{Livestatus is a simple Ruby library to control Nagios via MK Livestatus.}
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

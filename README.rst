@@ -3,11 +3,10 @@ livestatus
 ==========
 
 :Author: `Benedikt Böhm <bb@xnull.de>`_
-:Web: http://github.com/zenops/livestatus
+:Web: https://github.com/zenops/livestatus
 :Git: ``git clone https://github.com/zenops/livestatus``
 
-Livestatus is a simple Ruby library to get Nagios data via MK Livestatus or
-LivestatusSlave.
+Livestatus is a simple Ruby library to control Nagios via MK Livestatus.
 
 Contributing to livestatus
 ==========================

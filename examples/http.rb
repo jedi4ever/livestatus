@@ -2,7 +2,7 @@
 
 require 'livestatus'
 
-c = Livestatus::Connection.new("https://nagios.example.com/nagios/live.php")
+c = Livestatus::Connection.new("https://nagios.example.com/live")
 
 c.handler.session.insecure = true
 c.handler.session.auth_type = :basic
