@@ -9,6 +9,7 @@ module Livestatus
       Hash[env.select do |k, v|
         k =~ /^HTTP_X_LIVESTATUS_/
       end.map do |k, v|
+        v = Yajl::Parser.parse(v) if v =~ /^\[/
         [k[18..-1].downcase.to_sym, v]
       end]
     end
@@ -26,11 +27,12 @@ module Livestatus
 
       case method
       when :get
-        Yajl::Encoder.encode(c.get(query, headers))
+        res = c.get(query, headers).map(&:data)
       when :command
-        c.command(query)
-        Yajl::Encoder.encode(c.command(query))
+        res = c.command(query)
       end
+
+      Yajl::Encoder.encode(res)
     end
   end
 end

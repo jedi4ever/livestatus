@@ -4,7 +4,7 @@ require 'yajl'
 
 module Livestatus
 
-  class PatronHandler < BaseHandler
+  class PatronHandler
     attr_accessor :session
 
     def initialize(connection, config)
@@ -19,10 +19,23 @@ module Livestatus
       @uri = config[:uri]
     end
 
+    def get(model, options = {})
+      query(:get, model.table_name, options).map do |data|
+        model.new(data, @connection)
+      end
+    end
+
+    def command(cmd, time = nil)
+      time = Time.now.to_i unless time
+      query(:command, "[#{time}] #{cmd}")
+      nil
+    end
+
     def query(method, query, headers = {})
       headers = Hash[headers.merge({
         :query => "#{method.to_s.upcase} #{query}"
       }).map do |k, v|
+        v = Yajl::Encoder.encode(v) if v.is_a?(Array)
         ["X-Livestatus-#{k.to_s.dasherize}", v]
       end]
 

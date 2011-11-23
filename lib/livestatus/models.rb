@@ -2,7 +2,7 @@ require "active_support/core_ext"
 
 module Livestatus
   mattr_accessor :models
-  self.models = []
+  self.models = {}
 
   class Base
     attr_reader :data
@@ -88,5 +88,6 @@ Dir["#{File.dirname(__FILE__)}/models/*.rb"].map do |path|
   File.basename(path, '.rb')
 end.each do |name|
   require "livestatus/models/#{name}"
-  Livestatus.models << "Livestatus::#{name.pluralize.classify}".constantize
+  model = "Livestatus::#{name.pluralize.classify}".constantize
+  Livestatus.models[model.table_name] = model
 end
