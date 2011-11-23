@@ -18,7 +18,7 @@ module Livestatus
       headers = parse_headers(request.env)
 
       halt 400, 'no query specified' unless headers.include?(:query)
-      method, query = headers.delete(:query).split
+      method, query = headers.delete(:query).split(' ', 2)
 
       halt 400, 'invalid method' unless ['GET', 'COMMAND'].include?(method)
       method = method.downcase.to_sym
@@ -27,9 +27,11 @@ module Livestatus
 
       case method
       when :get
-        res = c.get(query, headers).map(&:data)
+        res = c.get(Livestatus.models[query], headers).map(&:data)
       when :command
-        res = c.command(query)
+        query =~ /\[([0-9]+)\] (.*)/
+        time, command = $1.to_i, $2
+        res = c.command(command, time)
       end
 
       Yajl::Encoder.encode(res)
