@@ -15,15 +15,11 @@ class Livestatus::Host < Livestatus::Base
     :last_time_unreachable, :last_time_up, :next_check, :next_notification
 
   def services
-    if @connection
-      @data[:services].map do |service|
-        @connection.get(Livestatus::Service, :filter => [
-          "host_name = #{name}",
-          "display_name = #{service}"
-        ]).first
-      end
-    else
-      @data[:services]
+    @data[:host_services_with_state].map do |service|
+      Livestatus::Service.new({
+        :display_name => service[0],
+        :state => service[1],
+      })
     end
   end
 
