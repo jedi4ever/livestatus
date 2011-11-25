@@ -7,7 +7,7 @@ module Livestatus
   class UnixHandler
     def initialize(connection, config)
       @connection = connection
-      @socket = UNIXSocket.open(config[:uri].sub(/^unix:\/\//, ''))
+      @path = config[:uri].sub(/^unix:\/\//, '')
     end
 
     def get(model, options = {})
@@ -17,7 +17,55 @@ module Livestatus
         :keep_alive => "on",
       })
 
-      headers = options.map do |k,v|
+      send("GET #{model.table_name}\n#{build_headers(options)}")
+      status, length = recv
+
+      unless status == 200
+        raise HandlerException, "livestatus query failed with status #{status}"
+      end
+
+      data = Yajl::Parser.parse(recv(length))
+
+      column_zip(data, options).map do |d|
+        model.new(d, @connection)
+      end
+    end
+
+    def command(cmd, time = nil)
+      time = Time.now.to_i unless time
+      send("COMMAND [#{time}] #{cmd}\n")
+      nil
+    end
+
+    private
+
+    def socket
+      @socket ||= socket!
+      @socket = socket! if @socket.closed?
+      @socket
+    end
+
+    def socket!
+      UNIXSocket.open(@path)
+    end
+
+    def send(msg)
+      socket.write(msg + "\n")
+    end
+
+    def recv(length = nil)
+      if length.nil?
+        # read response header
+        res = socket.read(16)
+        [res[0..2].to_i, res[4..14].chomp.to_i]
+      else
+        # read response body
+        socket.read(length)
+      end
+    end
+
+    def build_headers(options)
+      options.map do |k, v|
         if v.is_a?(Array)
           v.map do |e|
             "#{k.to_s.camelize}: #{e}"
@@ -25,41 +73,18 @@ module Livestatus
         else
           "#{k.to_s.camelize}: #{v}"
         end
-      end.flatten.join("\n")
-
-      headers += "\n" unless headers.empty?
-
-      @socket.write("GET #{model.table_name}\n#{headers}\n")
-
-      res = @socket.read(16)
-      status, length = res[0..2].to_i, res[4..14].chomp.to_i
-
-      unless status == 200
-        raise HandlerException, "livestatus query failed with status #{status}"
+      end.flatten.join("\n").tap do |s|
+        s += "\n" unless s.empty?
       end
+    end
 
-      data = Yajl::Parser.new.parse(@socket.read(length))
-
+    def column_zip(data, options)
       if options.include?(:columns)
         columns = options[:columns].split(" ")
       else
         columns = data.delete_at(0)
       end
 
-      column_zip(columns, data).map do |d|
-        model.new(d, @connection)
-      end
-    end
-
-    def command(cmd, time = nil)
-      time = Time.now.to_i unless time
-      @socket.write("COMMAND [#{time}] #{cmd}\n\n")
-      nil
-    end
-
-    private
-
-    def column_zip(columns, data)
       data.map do |d|
         Hash[columns.zip(d)]
       end

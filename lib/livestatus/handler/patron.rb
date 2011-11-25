@@ -12,7 +12,7 @@ module Livestatus
       @session = Patron::Session.new
       @session.timeout = 10
       @session.headers["User-Agent"] = "livestatus/#{VERSION} ruby/#{RUBY_VERSION}"
-      @session.insecure = config[:insecure]
+      @session.insecure = config.fetch(:insecure, false)
       @session.auth_type = config.fetch(:auth_type, :basic).to_sym
       @session.username = config[:username]
       @session.password = config[:password]

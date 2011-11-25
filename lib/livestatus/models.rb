@@ -39,12 +39,6 @@ module Livestatus
     end
   end
 
-  module ID
-    def id
-      Digest::SHA1.hexdigest(_id)[0..7]
-    end
-  end
-
   module State
     def state
       {

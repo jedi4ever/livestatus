@@ -1,3 +1,4 @@
+require "active_support/core_ext"
 require 'livestatus/connection'
 require 'livestatus/models'
 require 'sinatra/base'
@@ -5,6 +6,8 @@ require 'yajl'
 
 module Livestatus
   class API < Sinatra::Base
+    cattr_accessor :config
+
     def parse_headers(env)
       Hash[env.select do |k, v|
         k =~ /^HTTP_X_LIVESTATUS_/
@@ -23,7 +26,7 @@ module Livestatus
       halt 400, 'invalid method' unless ['GET', 'COMMAND'].include?(method)
       method = method.downcase.to_sym
 
-      c = Livestatus::Connection.new(:uri => 'unix:///var/nagios/rw/live')
+      c = Livestatus::Connection.new(self.config)
 
       case method
       when :get

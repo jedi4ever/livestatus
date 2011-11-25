@@ -1,4 +1,5 @@
 require "livestatus/handler"
+require "livestatus/memoize"
 
 module Livestatus
 
@@ -12,10 +13,6 @@ module Livestatus
     end
 
     def handler
-      @handler ||= handler!
-    end
-
-    def handler!
       case @config[:uri]
       when /^https?:\/\//
         PatronHandler.new(self, @config)
@@ -25,6 +22,8 @@ module Livestatus
         raise AttributeError, "unknown uri type: #{@config[:uri]}"
       end
     end
+
+    memoize :handler
   end
 
 end

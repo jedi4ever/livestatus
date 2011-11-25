@@ -1,5 +1,4 @@
 class Livestatus::Service < Livestatus::Base
-  include Livestatus::ID
   include Livestatus::CheckType
   include Livestatus::State
 
@@ -22,8 +21,4 @@ class Livestatus::Service < Livestatus::Base
     :last_hard_state_change, :last_notification, :last_state_change,
     :last_time_critical, :last_time_ok, :last_time_unknown, :last_time_warning,
     :next_check, :next_notification
-
-  def _id
-    host_display_name + display_name
-  end
 end

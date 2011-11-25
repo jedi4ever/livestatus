@@ -1,5 +1,4 @@
 class Livestatus::Host < Livestatus::Base
-  include Livestatus::ID
   include Livestatus::CheckType
   include Livestatus::State
 
@@ -15,15 +14,11 @@ class Livestatus::Host < Livestatus::Base
     :last_time_unreachable, :last_time_up, :next_check, :next_notification
 
   def services
-    @data[:host_services_with_state].map do |service|
+    @data[:services_with_state].map do |service|
       Livestatus::Service.new({
         :display_name => service[0],
         :state => service[1],
       })
     end
-  end
-
-  def _id
-    display_name
   end
 end
