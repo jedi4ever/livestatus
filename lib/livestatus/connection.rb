@@ -19,7 +19,7 @@ module Livestatus
       when /^unix:\/\//
         UnixHandler.new(self, @config)
       else
-        raise AttributeError, "unknown uri type: #{@config[:uri]}"
+        raise ArgumentError, "unknown uri type: #{@config[:uri]}"
       end
     end
 
