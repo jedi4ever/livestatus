@@ -9,12 +9,16 @@ module Livestatus
   self.connection = nil
 
   def self.get(model, options = {})
-    raise RuntimeError, "no global connection found" unless self.connection
-    self.connection.get(model, options)
+    connection = self.connection
+    connection = connection.call if connection.is_a?(Proc)
+    raise RuntimeError, "no global connection found" unless connection
+    connection.get(model, options)
   end
 
   def self.command(cmd, time = nil)
-    raise RuntimeError, "no global connection found" unless self.connection
-    self.connection.command(cmd, time)
+    connection = self.connection
+    connection = connection.call if connection.is_a?(Proc)
+    raise RuntimeError, "no global connection found" unless connection
+    connection.command(cmd, time)
   end
 end
