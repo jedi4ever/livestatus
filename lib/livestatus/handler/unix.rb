@@ -17,7 +17,7 @@ module Livestatus
         :keep_alive => "on",
       })
 
-      send("GET #{model.table_name}\n#{build_headers(options)}")
+      send("GET #{model.table_name}\n#{build_headers(options)}\n")
       status, length = recv
 
       unless status == 200
